@@ -20,64 +20,58 @@
 
         <section>
 
-            <table>
                 <?php
+                
                 $hostname = "127.0.0.1:3306";
                 $userDB = "root";
                 $passwordDB = "";
                 $schemaDB = "telefonia";
-
                 $conexionSQL = mysqli_connect($hostname, $userDB, $passwordDB, $schemaDB);
+                $consulta = mysqli_query($conexionSQL, "SELECT * FROM usuario");
 
-                $consulta = mysqli_query($conexionSQL, "SELECT * FROM usuario WHERE usuario.saldo > 150");
+                echo createTable($consulta, $schemaDB);
 
-                $registro = mysqli_fetch_assoc($consulta);
-
-                echo generarTitulo($schemaDB);
-                echo generarEncabezado($registro);
-                echo generarCuerpo($registro, $consulta);
                 mysqli_close($conexionSQL);
 
-                /* FUNCIONES */
 
-                function generarTitulo($nombreDB){
+                function createTable($consulta, $nameDB){
+                    $tableHTML = "<table>";
+                    $tableContent = createTableContent($consulta);
+                    return $tableHTML.createTitle($nameDB).$tableContent."</table>";
+    
+                }
+
+                function createTableContent($consulta){
+                    $tableBodyHTML = "<tbody>";
+                    $tableHeadHTML = "<thead>";
+
+                    while($registro = mysqli_fetch_assoc($consulta)){
+                        $tableBodyHTML = $tableBodyHTML.createRow($registro, "<td>" , "</td>");
+                        $campos = array_keys($registro);
+                    }
+
+                    $tableHeadHTML = $tableHeadHTML.createRow($campos, "<th>", "</th>");
+
+                    return $tableHeadHTML."</thead>".$tableBodyHTML."</tbody>";
+                }
+
+                function createRow($registro, $apertura, $cierre){
+                    $tableRow = "<tr>";
+
+                    foreach($registro as $value) {
+                        $tableRow = $tableRow.$apertura.$value.$cierre;
+                    }
+
+                    return $tableRow."</tr>";
+                }
+
+
+                function createTitle($nombreDB){
                     return "<caption><h1 class='title-style'>"."Tabla de ".$nombreDB."</h1></caption>";
                 }
 
-                function generarEncabezado($registro){
-
-                    $codigoHTML = "<thead><tr>";
-
-                    foreach ($registro as $key => $value) {
-                        $codigoHTML = $codigoHTML . "<th>" . $key . "</th>";
-                    }
-
-                    $codigoHTML = $codigoHTML . "</tr></thead>";
-
-                    return $codigoHTML;
-                }
-
-                function generarCuerpo($registro, $resultado){
-                    $codigoHTML = "<tbody>";
-
-                    do {
-
-                        $codigoHTML = $codigoHTML . "<tr>";
-
-                        foreach ($registro as $value) {
-                            $codigoHTML = $codigoHTML . "<td>" . $value . "</td>";
-                        }
-
-                        $codigoHTML = $codigoHTML . "</tr>";
-
-                    } while ($registro = mysqli_fetch_assoc($resultado));
-
-                    $codigoHTML = $codigoHTML . "</tbody>";
-                    return $codigoHTML;
-                }
 
                 ?>
-            </table>
 
         </section>
 
